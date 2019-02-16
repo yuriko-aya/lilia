@@ -13,7 +13,7 @@ import image_dl
 import dne
 import mxl
 
-TOKEN = 'NDYzNTI0NzU4MTU2MzQ1MzQ2.DhzHmw.FURe39VzD4WXzkgZ_LG5iNeX6vU'
+TOKEN = ''
 
 client = discord.Client()
 config = configparser.ConfigParser()
