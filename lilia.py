@@ -13,7 +13,7 @@ import image_dl
 import dne
 import mxl
 
-TOKEN = ''
+TOKEN = 'NDYzNTI0NzU4MTU2MzQ1MzQ2.DhzHmw.FURe39VzD4WXzkgZ_LG5iNeX6vU'
 
 client = discord.Client()
 config = configparser.ConfigParser()
@@ -22,10 +22,10 @@ config = configparser.ConfigParser()
 
 def file_name_generator(size=8, chars=string.ascii_letters):
     return ''.join(random.choice(chars) for _ in range(size))
-    
+
 def get_file_name(image):
     return print(glob.glob('/home/alice/.lilia/' + image + '*')[0])
-    
+
 def uppercase_abuse(message):
     words = message.split()
     upnum = len([word for word in words if word.isupper()])
@@ -33,8 +33,8 @@ def uppercase_abuse(message):
     tinum = len([word for word in words if word.istitle()])
 #    mixnum = len([word for word in words if not word.islower() and not word.isupper() and not word.istitle()])
     if len(words) >= 3:
-        return int(lonum)+int(tinum) < int(upnum)#+int(mixnum) 
-    
+        return int(lonum)+int(tinum) < int(upnum)#+int(mixnum)
+
 async def random_post_nsfw():
     await client.wait_until_ready()
     channel = discord.Object(id='464298646440116224') #nsfw LTF
@@ -52,7 +52,14 @@ async def rss_update():
         feed = feedparser.parse('https://aya.sanusi.id/feed/')
         config.read('feed.ini')
         if feed.entries[0].published != config['DEFAULT']['latest_post']:
-            msg = '@everyone Master AYA just published new post on her web, the title is ' + feed.entries[0].title + ' and you can view it in here : ' + feed.entries[0].link
+            if len(feed.entries[0].tags) > 1:
+                if feed.entries[0].tags[0].term == 'Novel' or feed.entries[0].tags[1].term == 'Novel':
+                    post_type = 'Novel'
+                else:
+                    post_type = feed.entries[0].tags[0].term
+            else:
+                post_type = feed.entries[0].tags[0].term
+            msg = '@everyone Master AYA just published new ' + post_type + ' on her web, the title is ' + feed.entries[0].title + ' and you can view it in here : ' + feed.entries[0].link
             config['DEFAULT']['latest_post'] = feed.entries[0].published
             with open ('feed.ini', 'w') as configfile:
                 config.write(configfile)
@@ -69,7 +76,7 @@ async def on_member_join(member):
     await client.send_message(channel, msg)
     await client.add_roles(member, role)
 
-@client.event    
+@client.event
 async def on_member_remove(member):
     msg = 'One of our dear comrade, {0} left us, let us wish the best for them'.format(member)
 #    channel = client.get_channel('470591265659027468')
@@ -79,20 +86,20 @@ async def on_member_remove(member):
 @client.event
 async def on_message(message):
     # we do not want the bot to reply to itself
-        
+
     print('[' + str(message.timestamp) + ' : ' + str(message.server) + '] ' + str(message.channel) + '->' + str(message.author) + ': ' + str(message.content))
-        
+
     nsfw_channel = discord.utils.get(client.get_all_channels(), server=message.server, name='nsfw')
-    
+
     file = random.choice(os.listdir('/home/alice/.lilia/imgsrc'))
 
     if message.author == client.user:
         return
-        
+
     if uppercase_abuse(str(message.content)):
         msg = "Uppercase abuse, {0.author.mention}, you've been warned!".format(message)
         await client.send_message(message.channel, msg)
-    
+
 #    if str(message.author) == 'Shinobu#3641':
 #        msg = 'Could you shut up Shinobu!'
 #        await client.send_message(message.channel, msg)
@@ -100,16 +107,16 @@ async def on_message(message):
     if message.content.startswith(('->help', '!help', '.help', '--help')):
         msg = 'I am really sorry master {0.author.mention}, the only one who can hel you is yourself, not me or anyone else'.format(message)
         await client.send_message(message.channel, msg)
-                
+
     if message.content.startswith('!lilia'):
         commands = message.content.split()
-        
+
         if commands[1] in {'help','->help', '!help', '.help', '--help'}:
             msg = 'I am really sorry master {0.author.mention}, the only one who can hel you is yourself, not me or anyone else'.format(message)
             await client.send_message(message.channel, msg)
-                
+
         elif commands[1] == 'commands':
-            msg = """ 
+            msg = """
 Hello, my name Lilia Anabel.
 I only available at AYA Translation.
 you can use me with `!lilia` as prefix.
@@ -131,14 +138,14 @@ decode command: `!lilia dne decode message`
 Move X Letter:
 encode command: `!lilia mxl encode message`
 decode command: `!lilia mxl decode message`
-           
+
             """
             await client.send_message(message.channel, msg)
-            
+
         elif commands[1] == 'gift':
             msg = 'This is gift from {.author.mention} for you, '.format(message) + commands[3]
             await client.send_file(nsfw_channel, '/home/alice/.lilia/imgsrc/' + file, content=msg)
-        
+
         elif commands[1] == 'yuribomb':
             if len(commands) >= 3 and commands[2].isdigit():
                 numbers = int(commands[2])
@@ -147,12 +154,12 @@ decode command: `!lilia mxl decode message`
             if numbers <= 8:
                 for i in range(numbers):
                     s_file = random.choice(os.listdir('/home/alice/.lilia/imgsrc'))
-                    msg = i + ':'
+                    msg = str(i+1) + ':'
                     await client.send_file(nsfw_channel, '/home/alice/.lilia/imgsrc/' + s_file, content=msg)
             else:
                 msg = 'You requesting too much, Master {0.author.mention}'.format(message)
-                await client.send_message(message.channel, msg)    
-        
+                await client.send_message(message.channel, msg)
+
         elif commands[1] == 'dne' and len(commands) >= 4:
             if commands[2] == 'encode':
                 msg = 'This is the result, {0.author}: '.format(message)+dne.dencode(' '.join(commands[3:len(commands)]), 'encode')
@@ -160,7 +167,7 @@ decode command: `!lilia mxl decode message`
             if commands[2] == 'decode':
                 msg = 'Result: '+dne.dencode(' '.join(commands[3:len(commands)]), 'decode')
                 await client.send_message(message.channel, msg)
-        
+
         elif commands[1] == 'mxl' and len(commands) >= 4:
             if commands[2] == 'encode':
                 msg = 'Ini hasilnya, {0.author}: '.format(message)+mxl.dencode(' '.join(commands[3:len(commands)]), 'encode')
@@ -172,7 +179,7 @@ decode command: `!lilia mxl decode message`
         elif commands[1].lower() in {'hi', 'hello', 'pagi', 'siang', 'sore', 'selamat', 'met'} and len(commands) <= 3:
             msg = ' '.join(commands[1:len(commands)]) + ' juga Master {0.author.mention}'.format(message)
             await client.send_message(message.channel, msg)
-        
+
 #        elif commands[1] == 'find':
 #            query = ' '.join(commands[2:len(commands)])
 #            file_name = file_name_generator()
@@ -185,13 +192,13 @@ decode command: `!lilia mxl decode message`
 #            else:
 #                msg = 'Maaf sekali {0.author.mention}, Saya tidak bisa memenuhi permintaan Anda.'.format(message)
 #                await client.send_message(message.channel, msg)
-                
+
         else:
             query = ' '.join(commands[1:len(commands)])
             msg = 'Master, what do you mean wuth ' + query + '? I do not undersatnd.'
             await client.send_message(message.channel, msg)
-        
-        
+
+
 @client.event
 async def on_ready():
     print('Logged in as')
