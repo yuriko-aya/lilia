@@ -11,12 +11,15 @@ import mxl
 import logging
 import re
 from datetime import datetime
+from logging.handlers import TimedRotatingFileHandler
 
 now = datetime.today()
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
-handler = logging.FileHandler(
-    filename='discord ' + str(now) + '.log', encoding='utf-8', mode='w')
+handler = TimedRotatingFileHandler('discord.log',
+                                    when="h",
+                                    interval=6,
+                                    backupCount=20)
 handler.setFormatter(
     logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
@@ -243,16 +246,17 @@ decode command: `!lilia mxl decode message`
                       'I do not understand'.format(message, query)
                 await message.channel.send(msg)
 
-token_config = configparser.ConfigParser()
+if __name__ == "__main__":
+    token_config = configparser.ConfigParser()
 
-token_config.read('config.ini')
-'''
-config.ini contents:
-[TOKEN]
-token = your_token_code
-'''
+    token_config.read('config.ini')
+    '''
+    config.ini contents:
+    [TOKEN]
+    token = your_token_code
+    '''
 
-TOKEN = token_config['TOKEN']['token']
+    TOKEN = token_config['TOKEN']['token']
 
-client = LiliaBot()
-client.run(TOKEN)
+    client = LiliaBot()
+    client.run(TOKEN)
