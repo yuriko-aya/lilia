@@ -72,7 +72,7 @@ class LiliaBot(discord.Client):
 
     async def rss_update(self):
         await self.wait_until_ready()
-        channel = self.get_channel(521274830159347712)
+        channel = self.get_channel(600315520302055434)
         # channel = discord.Object(id='521269328046325776')
         while not self.is_closed():
             feed = feedparser.parse('https://aya.sanusi.id/feed/')
@@ -101,10 +101,12 @@ class LiliaBot(discord.Client):
 
     async def on_member_join(self, member):
         guild = member.guild
+	role =  discord.utils.get(guild.roles, name='Commoner')
         if guild.system_channel is not None:
             msg = 'Welcome to {0.name}, {1.mention}-sama,' \
                   ' We hope you enjoy your stay here'.format(guild, member)
             await guild.system_channel.send(msg)
+            await member.add_roles(role)
 
     async def on_member_remove(self, member):
         guild = member.guild
