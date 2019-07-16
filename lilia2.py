@@ -19,7 +19,7 @@ logger.setLevel(logging.INFO)
 handler = TimedRotatingFileHandler('discord.log',
                                     when="h",
                                     interval=6,
-                                    backupCount=20)
+                                    backupCount=5)
 handler.setFormatter(
     logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
