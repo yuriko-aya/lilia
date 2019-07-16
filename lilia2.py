@@ -97,7 +97,7 @@ class LiliaBot(discord.Client):
                 with open('feed.ini', 'w') as configfile:
                     config.write(configfile)
                 await channel.send(msg)
-            await asyncio.sleep(60)
+            await asyncio.sleep(300)
 
     async def on_member_join(self, member):
         guild = member.guild
