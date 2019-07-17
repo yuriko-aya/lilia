@@ -88,7 +88,7 @@ class LiliaBot(discord.Client):
                         post_type = feed.entries[0].tags[0].term
                 else:
                     post_type = feed.entries[0].tags[0].term
-                msg = ('Master AYA just published new ' +
+                msg = ('@everyone Master AYA just published new ' +
                        post_type + ' on her web, the title is ' +
                        feed.entries[0].title +
                        ' and you can view it in here : ' +
@@ -103,7 +103,7 @@ class LiliaBot(discord.Client):
         guild = member.guild
         role =  discord.utils.get(guild.roles, name='Commoner')
         if guild.system_channel is not None:
-            msg = 'Welcome to {0.name}, {1.mention}-sama,' \
+            msg = 'Welcome to {0.name}, {1.mention} onee-sama,' \
                   ' We hope you enjoy your stay here'.format(guild, member)
             await guild.system_channel.send(msg)
             await member.add_roles(role)
@@ -134,13 +134,13 @@ class LiliaBot(discord.Client):
             await message.channel.send(msg)
 
         if message.content.startswith(('->help', '!help', '.help', '--help')):
-            msg = 'I am really sorry master {0.author.mention},' \
+            msg = 'I am really sorry {0.author.mention} onee-sama,' \
                    ' the only one who can hel you is yourself, not me' \
                    ' or anyone else'.format(message)
             await message.channel.send(msg)
 
         if '<@463524758156345346>' in message.content:
-            msg = 'Did you call me, {0.author.mention}-sama?' \
+            msg = 'Did you call me, {0.author.mention} onee-sama?' \
                 ' I am sorry but that is not how to use me' \
                 ' Please kindly use `!lilia commands` to learn' \
                 ' how to use me.'.format(message)
@@ -150,14 +150,14 @@ class LiliaBot(discord.Client):
             commands = message.content.split()
 
             if commands[1] in {'help', '->help', '!help', '.help', '--help'}:
-                msg = 'I am really sorry master {0.author.mention},' \
+                msg = 'I am really sorry {0.author.mention} onee-sama,' \
                     ' the only one who can hel you is yourself, not me' \
                     ' or anyone else'.format(message)
                 await message.channel.send(msg)
 
             elif commands[1] == 'gift':
-                msg = 'This is gift from {0.author.mention}-sama for you, ' \
-                      .format(message) + commands[3] + '-sama'
+                msg = 'This is gift from {0.author.mention} onee-sama for you, ' \
+                      .format(message) + commands[3] + ' onee-sama'
                 dest = re.sub(r"\D+", "", commands[3])
                 member_name = self.get_user(int(dest))
                 await member_name.send(msg, file=discord.File(
@@ -189,7 +189,7 @@ class LiliaBot(discord.Client):
                             ))
                 else:
                     await message.channel.send(
-                        'You requesting too much, {0.author.mention}'
+                        'You requesting too much, {0.author.mention} onee-sama'
                         .format(message)
                     )
 
@@ -203,13 +203,13 @@ class LiliaBot(discord.Client):
             elif commands[1] == 'suicide':
                 print(message.author.name)
                 if message.author.id != 346541452807110666:
-                    msg = 'I am sorry {0.author.mention}-sama, you do not' \
+                    msg = 'I am sorry {0.author.mention} onee-sama, you do not' \
                           ' have any right to order me to do that'.format(
                               message
                           )
                     await message.channel.send(msg)
                 else:
-                    msg = 'Yes, Master {0.author.mention}' \
+                    msg = 'I understand, {0.author.mention} onee-sama' \
                           ' I will kill myslef now'.format(message)
                     await message.channel.send(msg)
                     # os.kill(os.getpid(), 9)
@@ -220,11 +220,11 @@ class LiliaBot(discord.Client):
 Hello, my name Lilia Anabel.
 I only available at AYA Translation.
 you can use me with `!lilia` as prefix.
-I'm just created recently by my master so I don't have a lot function
+I'm just created recently by AYA onee-sama so I don't have a lot function
 
 **gift**:
 command: `!lilia gift to @user`
-gift nswf image and mention @user
+gift NSFW image and mention @user
 
 **yuribomb**:
 command: `!lilia yuribomb number`
@@ -244,7 +244,7 @@ decode command: `!lilia mxl decode message`
 
             else:
                 query = ' '.join(commands[1:])
-                msg = '{0.author.mention}-sama, what do you mean with {1}?' \
+                msg = '{0.author.mention} onee-sama, what do you mean with {1}?' \
                       'I do not understand'.format(message, query)
                 await message.channel.send(msg)
 
