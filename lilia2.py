@@ -248,8 +248,7 @@ class LiliaBot(discord.Client):
                     lines = post[1].splitlines()
                     for line in lines:
                         msg = self.get_the_text(line)
-                        if not msg:
-                            msg += '_ _'
+                        msg += '_ _'
                         await message.channel.send(msg)
                         time.sleep(2)
 
