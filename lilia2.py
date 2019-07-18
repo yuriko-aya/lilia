@@ -247,11 +247,11 @@ class LiliaBot(discord.Client):
                 posts = mycursor.fetchall()
                 for post in posts:
                     await message.channel.send('**' + post[0] + '**')
-                    lines = post[1]
+                    lines = post[1].splitlines()
                     for line in lines:
-                        if not line:
-                            line = ' '
                         msg = self.html_to_markdown(line)
+                        if not msg:
+                            msg = ' '
                         await message.channel.send(msg)
                         time.sleep(2)
 
