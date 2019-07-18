@@ -251,7 +251,7 @@ class LiliaBot(discord.Client):
                     for line in lines:
                         msg = self.html_to_markdown(line)
                         if not msg:
-                            msg = ' '
+                            msg = '_ _'
                         await message.channel.send(msg)
                         time.sleep(2)
 
