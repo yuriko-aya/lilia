@@ -250,7 +250,7 @@ class LiliaBot(discord.Client):
                         msg = self.get_the_text(line)
                         msg += '_ _'
                         await message.channel.send(msg)
-                        time.sleep(2)
+                        time.sleep(0.5)
 
             elif commands[1] == 'commands':
                 msg = """
