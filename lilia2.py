@@ -243,14 +243,15 @@ class LiliaBot(discord.Client):
                             "ORDER BY id DESC LIMIT 1"
                 mycursor.execute(sql_query)
                 posts = mycursor.fetchall()
-                for post in posts:
-                    await message.channel.send('**' + post[0] + '**')
-                    lines = post[1].splitlines()
-                    for line in lines:
-                        msg = self.get_the_text(line)
-                        msg += '_ _'
-                        await message.channel.send(msg)
-                        time.sleep(0.5)
+                if posts:
+                    for post in posts:
+                        await message.channel.send('**' + post[0] + '**')
+                        lines = post[1].splitlines()
+                        for line in lines:
+                            msg = self.get_the_text(line)
+                            msg += '_ _'
+                            await message.channel.send(msg)
+                            time.sleep(0.5)
 
             elif commands[1] == 'commands':
                 msg = """
