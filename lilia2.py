@@ -10,6 +10,9 @@ import dne
 import mxl
 import logging
 import re
+import mysql.connector
+import html2markdown
+import time
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
@@ -17,9 +20,9 @@ now = datetime.today()
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
 handler = TimedRotatingFileHandler('discord.log',
-                                    when="h",
-                                    interval=6,
-                                    backupCount=5)
+                                   when="h",
+                                   interval=6,
+                                   backupCount=5)
 handler.setFormatter(
     logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
@@ -70,6 +73,12 @@ class LiliaBot(discord.Client):
                     '{0.author.mention}-sama'.format(message)
         return msg
 
+    def get_the_contents(self):
+        return lines
+
+    def html_to_markdown(self, string):
+        return html2markdown.convert(string)
+
     async def rss_update(self):
         await self.wait_until_ready()
         channel = self.get_channel(600315520302055434)
@@ -101,7 +110,7 @@ class LiliaBot(discord.Client):
 
     async def on_member_join(self, member):
         guild = member.guild
-        role =  discord.utils.get(guild.roles, name='Commoner')
+        role = discord.utils.get(guild.roles, name='Commoner')
         if guild.system_channel is not None:
             msg = 'Welcome to {0.name}, {1.mention} onee-sama,' \
                   ' We hope you enjoy your stay here'.format(guild, member)
@@ -156,8 +165,8 @@ class LiliaBot(discord.Client):
                 await message.channel.send(msg)
 
             elif commands[1] == 'gift':
-                msg = 'This is gift from {0.author.mention} onee-sama for you, ' \
-                      .format(message) + commands[3] + ' onee-sama'
+                msg = 'This is gift from {0.author.mention} onee-sama for ' \
+                      'you, '.format(message) + commands[3] + ' onee-sama'
                 dest = re.sub(r"\D+", "", commands[3])
                 member_name = self.get_user(int(dest))
                 await member_name.send(msg, file=discord.File(
@@ -201,10 +210,9 @@ class LiliaBot(discord.Client):
                 await message.channel.send(msg)
 
             elif commands[1] == 'suicide':
-                print(message.author.name)
                 if message.author.id != 346541452807110666:
-                    msg = 'I am sorry {0.author.mention} onee-sama, you do not' \
-                          ' have any right to order me to do that'.format(
+                    msg = 'I am sorry {0.author.mention} onee-sama, you do '\
+                          'not have any right to order me to do that'.format(
                               message
                           )
                     await message.channel.send(msg)
@@ -214,6 +222,36 @@ class LiliaBot(discord.Client):
                     await message.channel.send(msg)
                     # os.kill(os.getpid(), 9)
                     await self.close()
+
+            elif commands[1] == 'spoiler':
+                if message.author.id != 346541452807110666:
+                    msg = 'I am sorry {0.author.mention} onee-sama, you do '\
+                          'not have any right to order me to do that'.format(
+                              message
+                          )
+                    await message.channel.send(msg)
+                    return
+                db_config = configparser.ConfigParser()
+                db_config.read('config.ini')
+                mydb = mysql.connector.connect(
+                    host=db_config['DATABASE']['host'],
+                    user=db_config['DATABASE']['user'],
+                    passwd=db_config['DATABASE']['password'],
+                    database=db_config['DATABASE']['database']
+                )
+                mycursor = mydb.cursor()
+                sql_query = "SELECT post_title, post_content FROM wp_posts " \
+                            "WHERE post_status='future' AND post_type='post' "\
+                            "ORDER BY id DESC LIMIT 1"
+                mycursor.execute(sql_query)
+                posts = mycursor.fetchall()
+                for post in posts:
+                    await message.channel.send('**' + post[0] + '**')
+                    lines = post[1]
+                    for line in lines:
+                        msg = self.html_to_markdown(line)
+                        await message.channel.send(msg)
+                        time.sleep(2)
 
             elif commands[1] == 'commands':
                 msg = """
@@ -244,8 +282,8 @@ decode command: `!lilia mxl decode message`
 
             else:
                 query = ' '.join(commands[1:])
-                msg = '{0.author.mention} onee-sama, what do you mean with {1}?' \
-                      'I do not understand'.format(message, query)
+                msg = '{0.author.mention} onee-sama, what do you mean with '\
+                      '{1}? I do not understand'.format(message, query)
                 await message.channel.send(msg)
 
 if __name__ == "__main__":
