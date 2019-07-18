@@ -11,8 +11,8 @@ import mxl
 import logging
 import re
 import mysql.connector
-import html2markdown
 import time
+from bs4 import BeautifulSoup
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 
@@ -73,11 +73,9 @@ class LiliaBot(discord.Client):
                     '{0.author.mention}-sama'.format(message)
         return msg
 
-    def get_the_contents(self):
-        return lines
-
-    def html_to_markdown(self, string):
-        return html2markdown.convert(string)
+    def get_the_text(self, string):
+        soup = BeautifulSoup(string)
+        return soup.get_text()
 
     async def rss_update(self):
         await self.wait_until_ready()
@@ -249,7 +247,7 @@ class LiliaBot(discord.Client):
                     await message.channel.send('**' + post[0] + '**')
                     lines = post[1].splitlines()
                     for line in lines:
-                        msg = self.html_to_markdown(line)
+                        msg = self.get_the_text(line)
                         if not msg:
                             msg = '_ _'
                         await message.channel.send(msg)
