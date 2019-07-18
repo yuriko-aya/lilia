@@ -245,13 +245,21 @@ class LiliaBot(discord.Client):
                 posts = mycursor.fetchall()
                 if posts:
                     for post in posts:
+                        await message.channel.send('------------------------')
+                        await message.channel.send(
+                            'Starting to post earlly release')
+                        await message.channel.send('------------------------')
                         await message.channel.send('**' + post[0] + '**')
+                        await message.channel.send('------------------------')
                         lines = post[1].splitlines()
                         for line in lines:
                             msg = self.get_the_text(line)
                             msg += '_ _'
                             await message.channel.send(msg)
                             time.sleep(0.5)
+                        await message.channel.send('------------------------')
+                        await message.channel.send('End of **' + post[0] + '**')
+                        await message.channel.send('------------------------')
 
             elif commands[1] == 'commands':
                 msg = """
