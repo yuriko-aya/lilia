@@ -19,15 +19,14 @@ from logging.handlers import TimedRotatingFileHandler
 now = datetime.today()
 logger = logging.getLogger('discord')
 logger.setLevel(logging.INFO)
-handler = TimedRotatingFileHandler('discord.log',
-                                   when="h",
-                                   interval=6,
+handler = TimedRotatingFileHandler('/var/log/lilia/lilia.log',
+                                   when="midnight",
                                    backupCount=5)
 handler.setFormatter(
     logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
 logger.addHandler(handler)
 
-
+os.chdir('/home/alice/lilia/')
 class LiliaBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
