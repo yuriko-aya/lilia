@@ -12,6 +12,7 @@ import logging
 import re
 import mysql.connector
 import time
+import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
@@ -27,6 +28,8 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 os.chdir('/home/alice/lilia/')
+
+
 class LiliaBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,27 +57,51 @@ class LiliaBot(discord.Client):
         lonum = len([word for word in words if word.islower()])
         tinum = len([word for word in words if word.istitle()])
         if len(words) >= 3:
-            return int(lonum)+int(tinum) < int(upnum)  # +int(mixnum)
+            return int(lonum) + int(tinum) < int(upnum)  # +int(mixnum)
 
     def dencrypt(self, method, message):
         commands = message.content.split()
         used_method = eval(method)
         if commands[2] == 'encode':
             msg = 'This is the result, {0.author.mention}-sama: ' \
-                    .format(message) \
-                    + used_method.dencode(' '.join(commands[3:]), 'encode')
+                  .format(message) \
+                  + used_method.dencode(' '.join(commands[3:]), 'encode')
         elif commands[2] == 'decode':
             msg = 'This is the result, {0.author.mention}-sama: ' \
-                    .format(message) \
-                    + used_method.dencode(' '.join(commands[3:]), 'decode')
+                  .format(message) \
+                  + used_method.dencode(' '.join(commands[3:]), 'decode')
         else:
             msg = 'Somethign wrong with your request, ' \
-                    '{0.author.mention}-sama'.format(message)
+                  '{0.author.mention}-sama'.format(message)
         return msg
 
     def get_the_text(self, string):
         soup = BeautifulSoup(string)
         return soup.get_text()
+
+    async def check_portcities_instance_5(self):
+        port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
+        admin = self.get_user(346541452807110666)
+        msg = 'Instance 5 port: '
+        while not self.is_closed():
+            for port in port_list:
+                url = 'http://35.197.146.88:' + port
+                try:
+                    response = requests.get(url, timeout=60)
+                    if response.status_code == 200 or response.status_code == 301:
+                        msg += port + ' is OK'
+                    else:
+                        msg += port + ' Error status code: ' + response.status_code
+                    await admin.send('msg')
+                except requests.exceptions.Timeout:
+                    msg += port + ' is Timeout'
+                    await admin.send('msg')
+                    pass
+                except requests.exceptions.RequestException as error_message:
+                    msg += port + ' is ERROR:' + error_message
+                    await admin.send('msg')
+                    pass
+            await asyncio.sleep(1800)
 
     async def rss_update(self):
         await self.wait_until_ready()
@@ -87,8 +114,8 @@ class LiliaBot(discord.Client):
             if feed.entries[0].published != config['DEFAULT']['latest_post']:
                 if len(feed.entries[0].tags) > 1:
                     if feed.entries[0].tags[0].term == 'Novel' \
-                                                    or feed.entries[0].tags[1]\
-                                                    .term == 'Novel':
+                                                       or feed.entries[0].tags[1]\
+                                                       .term == 'Novel':
                         post_type = 'Novel'
                     else:
                         post_type = feed.entries[0].tags[0].term
@@ -141,8 +168,8 @@ class LiliaBot(discord.Client):
 
         if message.content.startswith(('->help', '!help', '.help', '--help')):
             msg = 'I am really sorry {0.author.mention} onee-sama,' \
-                   ' the only one who can hel you is yourself, not me' \
-                   ' or anyone else'.format(message)
+                  ' the only one who can hel you is yourself, not me' \
+                  ' or anyone else'.format(message)
             await message.channel.send(msg)
 
         if '<@463524758156345346>' in message.content:
@@ -188,7 +215,7 @@ class LiliaBot(discord.Client):
                 if number <= 8:
                     for i in range(number):
                         await nchannel.send(
-                            str(i+1) + ':',
+                            str(i + 1) + ':',
                             file=discord.File(
                                 '/home/alice/.lilia/imgsrc/' +
                                 self.get_random_image()
@@ -292,6 +319,7 @@ decode command: `!lilia mxl decode message`
                 msg = '{0.author.mention} onee-sama, what do you mean with '\
                       '{1}? I do not understand'.format(message, query)
                 await message.channel.send(msg)
+
 
 if __name__ == "__main__":
     token_config = configparser.ConfigParser()
