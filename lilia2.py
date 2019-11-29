@@ -36,11 +36,6 @@ class LiliaBot(discord.Client):
 
         self.bg_task = self.loop.create_task(self.rss_update())
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.bg_task = self.loop.create_task(self.check_portcities_instance_5())
-
     async def on_ready(self):
         print('Looged in as')
         print(self.user.name)
@@ -49,6 +44,7 @@ class LiliaBot(discord.Client):
         activity = discord.Game('with AYA on her bed')
         await self.change_presence(status=discord.Status.online,
                                    activity=activity)
+        await self.loop.create_task(self.check_portcities_instance_5())
 
     def get_random_image(self):
         s_file = random.choice(
@@ -87,9 +83,9 @@ class LiliaBot(discord.Client):
     async def check_portcities_instance_5(self):
         port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
         admin = self.get_user(346541452807110666)
-        msg = 'Instance 5 port: '
         while not self.is_closed():
             for port in port_list:
+                msg = 'Instance 5 port: '
                 url = 'http://35.197.146.88:' + port
                 try:
                     response = requests.get(url, timeout=60)
@@ -97,16 +93,16 @@ class LiliaBot(discord.Client):
                         msg += port + ' is OK'
                     else:
                         msg += port + ' Error status code: ' + response.status_code
-                    await admin.send('msg')
+                    await admin.send(msg)
                 except requests.exceptions.Timeout:
                     msg += port + ' is Timeout'
-                    await admin.send('msg')
+                    await admin.send(msg)
                     pass
                 except requests.exceptions.RequestException as error_message:
                     msg += port + ' is ERROR:' + error_message
-                    await admin.send('msg')
+                    await admin.send(msg)
                     pass
-            await asyncio.sleep(1800)
+            await asyncio.sleep(3600)
 
     async def rss_update(self):
         await self.wait_until_ready()
@@ -237,6 +233,9 @@ class LiliaBot(discord.Client):
                 msg = ' '.join(commands[1:]) +\
                     ' too, {0.author.mention}-sama'.format(message)
                 await message.channel.send(msg)
+
+            elif commands[1] == 'monitor':
+                await self.check_portcities_instance_5()
 
             elif commands[1] == 'suicide':
                 if message.author.id != 346541452807110666:
