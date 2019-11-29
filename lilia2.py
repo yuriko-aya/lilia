@@ -35,6 +35,10 @@ class LiliaBot(discord.Client):
         super().__init__(*args, **kwargs)
 
         self.bg_task = self.loop.create_task(self.rss_update())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.bg_task = self.loop.create_task(self.check_portcities_instance_5())
 
     async def on_ready(self):
