@@ -91,9 +91,10 @@ class LiliaBot(discord.Client):
                     response = requests.get(url, timeout=60)
                     if response.status_code == 200 or response.status_code == 301:
                         msg += port + ' is OK'
+                        logger.info(msg)
                     else:
                         msg += port + ' Error status code: ' + response.status_code
-                    await admin.send(msg)
+                        await admin.send(msg)
                 except requests.exceptions.Timeout:
                     msg += port + ' is Timeout'
                     await admin.send(msg)
