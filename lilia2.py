@@ -127,7 +127,7 @@ class LiliaBot(discord.Client):
                        + post_type + ' on her web, the title is '
                        + feed.entries[0].title
                        + ' and you can view it in here : '
-                       feed.entries[0].link)
+                       + feed.entries[0].link)
                 config['DEFAULT']['latest_post'] = feed.entries[0].published
                 with open('feed.ini', 'w') as configfile:
                     config.write(configfile)
