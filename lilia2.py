@@ -47,9 +47,9 @@ class LiliaBot(discord.Client):
                                    activity=activity)
         # await self.loop.create_task(self.check_portcities_instance_5())
 
-    def background_task(self):
-        self.rss_update()
-        self.check_portcities_instance_5()
+    async def background_task(self):
+        await self.rss_update()
+        await self.check_portcities_instance_5()
 
     def get_random_image(self):
         s_file = random.choice(
