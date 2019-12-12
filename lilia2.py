@@ -34,8 +34,8 @@ class LiliaBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # self.bg_task = self.loop.create_task(self.rss_update())
-        self.bg_task = self.loop.create_task(self.background_task())
+        self.bg_task = self.loop.create_task(self.rss_update())
+        # self.bg_task = self.loop.create_task()
 
     async def on_ready(self):
         print('Looged in as')
@@ -45,7 +45,7 @@ class LiliaBot(discord.Client):
         activity = discord.Game('with AYA on her bed')
         await self.change_presence(status=discord.Status.online,
                                    activity=activity)
-        # await self.loop.create_task(self.check_portcities_instance_5())
+        await self.loop.create_task(self.check_portcities_instance_5())
 
     async def background_task(self):
         await self.rss_update()
@@ -86,6 +86,7 @@ class LiliaBot(discord.Client):
         return soup.get_text()
 
     async def check_portcities_instance_5(self):
+        await self.wait_until_ready()
         port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
         admin = self.get_user(346541452807110666)
         while not self.is_closed():
