@@ -103,7 +103,7 @@ class LiliaBot(discord.Client):
                     msg += port + ' is ERROR:' + error_message
                     await admin.send(msg)
                     pass
-            await asyncio.sleep(3600)
+            await asyncio.sleep(600)
 
     async def rss_update(self):
         await self.wait_until_ready()
@@ -123,10 +123,10 @@ class LiliaBot(discord.Client):
                         post_type = feed.entries[0].tags[0].term
                 else:
                     post_type = feed.entries[0].tags[0].term
-                msg = ('@everyone Master AYA just published new ' +
-                       post_type + ' on her web, the title is ' +
-                       feed.entries[0].title +
-                       ' and you can view it in here : ' +
+                msg = ('@everyone Master AYA just published new '
+                       + post_type + ' on her web, the title is '
+                       + feed.entries[0].title
+                       + ' and you can view it in here : '
                        feed.entries[0].link)
                 config['DEFAULT']['latest_post'] = feed.entries[0].published
                 with open('feed.ini', 'w') as configfile:
@@ -219,8 +219,8 @@ class LiliaBot(discord.Client):
                         await nchannel.send(
                             str(i + 1) + ':',
                             file=discord.File(
-                                '/home/alice/.lilia/imgsrc/' +
-                                self.get_random_image()
+                                '/home/alice/.lilia/imgsrc/'
+                                + self.get_random_image()
                             ))
                 else:
                     await message.channel.send(
