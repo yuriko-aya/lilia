@@ -1,8 +1,12 @@
 [TOKEN]
-token = 
+token =
 
 [DATABASE]
-host = 
-user = 
-password = 
-database = 
+host =
+user =
+password =
+database =
+
+[SERVER]
+ip =
+port_range = 

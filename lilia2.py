@@ -13,6 +13,8 @@ import re
 import mysql.connector
 import time
 import requests
+import aiohttp
+import json
 from bs4 import BeautifulSoup
 from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
@@ -34,8 +36,7 @@ class LiliaBot(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.bg_task = self.loop.create_task(self.rss_update())
-        # self.bg_task = self.loop.create_task()
+        self.bg_task = self.loop.create_task(self.background_task())
 
     async def on_ready(self):
         print('Looged in as')
@@ -45,11 +46,68 @@ class LiliaBot(discord.Client):
         activity = discord.Game('with AYA on her bed')
         await self.change_presence(status=discord.Status.online,
                                    activity=activity)
-        await self.loop.create_task(self.check_portcities_instance_5())
 
     async def background_task(self):
-        await self.rss_update()
-        await self.check_portcities_instance_5()
+        await self.wait_until_ready()
+        admin = self.get_user(346541452807110666)
+        channel = self.get_channel(600315520302055434)
+        config = configparser.ConfigParser()
+        config.read(['feed.ini', 'config.ini'])
+        port_list = json.loads(config.get('SERVER', 'port_list'))
+        while not self.is_closed():
+            feed = feedparser.parse('https://aya.sanusi.id/feed/')
+            logger.info('Start checking Instance 5 instances')
+            for port in port_list:
+                port = str(port)
+                msg = 'Instance 5 port: '
+                url = 'http://' + config['SERVER']['ip'] + ':' + port
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        # timeout = aiohttp.ClientTimeout(total=60)
+                        async with session.get(url, timeout=1) as response:
+                            if response.status in [200, 301, 302, 303]:
+                                msg += port + ' is OK. Status Code: ' + str(response.status)
+                                logger.info(msg)
+                            else:
+                                msg += port + ' Error status code: ' + str(response.status)
+                                logger.warning(msg)
+                                await admin.send(msg)
+                except aiohttp.ServerTimeoutError:
+                    msg += port + ' is Timeout'
+                    logger.warning(msg)
+                    await admin.send(msg)
+                    pass
+                except aiohttp.ClientError as error_message:
+                    msg += port + ' is ERROR:' + error_message
+                    logger.warning(msg)
+                    await admin.send(msg)
+                    pass
+
+                await asyncio.sleep(5)
+            logger.info('Finished checking inatnce-5')
+
+            logger.info('Start to proceed the feed')
+            if feed.entries[0].published != config['DEFAULT']['latest_post']:
+                if len(feed.entries[0].tags) > 1:
+                    if feed.entries[0].tags[0].term == 'Novel' \
+                                                       or feed.entries[0].tags[1]\
+                                                       .term == 'Novel':
+                        post_type = 'Novel'
+                    else:
+                        post_type = feed.entries[0].tags[0].term
+                else:
+                    post_type = feed.entries[0].tags[0].term
+                msg = ('@everyone Master AYA just published new '
+                       + post_type + ' on her web, the title is '
+                       + feed.entries[0].title
+                       + ' and you can view it in here : '
+                       + feed.entries[0].link)
+                config['DEFAULT']['latest_post'] = feed.entries[0].published
+                with open('feed.ini', 'w') as configfile:
+                    config.write(configfile)
+                await channel.send(msg)
+            logger.info('Feed proceed finished')
+            await asyncio.sleep(300)
 
     def get_random_image(self):
         s_file = random.choice(
@@ -85,60 +143,60 @@ class LiliaBot(discord.Client):
         soup = BeautifulSoup(string)
         return soup.get_text()
 
-    async def check_portcities_instance_5(self):
-        await self.wait_until_ready()
-        port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
-        admin = self.get_user(346541452807110666)
-        while not self.is_closed():
-            for port in port_list:
-                msg = 'Instance 5 port: '
-                url = 'http://35.197.146.88:' + port
-                try:
-                    response = requests.get(url, timeout=60)
-                    if response.status_code == 200 or response.status_code == 301:
-                        msg += port + ' is OK'
-                        logger.info(msg)
-                    else:
-                        msg += port + ' Error status code: ' + response.status_code
-                        await admin.send(msg)
-                except requests.exceptions.Timeout:
-                    msg += port + ' is Timeout'
-                    await admin.send(msg)
-                    pass
-                except requests.exceptions.RequestException as error_message:
-                    msg += port + ' is ERROR:' + error_message
-                    await admin.send(msg)
-                    pass
-            await asyncio.sleep(600)
+    # async def check_portcities_instance_5(self):
+    #     await self.wait_until_ready()
+    #     port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
+    #     admin = self.get_user(346541452807110666)
+    #     while not self.is_closed():
+    #         for port in port_list:
+    #             msg = 'Instance 5 port: '
+    #             url = 'http://35.197.146.88:' + port
+    #             try:
+    #                 response = requests.get(url, timeout=60)
+    #                 if response.status_code == 200 or response.status_code == 301:
+    #                     msg += port + ' is OK'
+    #                     logger.info(msg)
+    #                 else:
+    #                     msg += port + ' Error status code: ' + response.status_code
+    #                     await admin.send(msg)
+    #             except requests.exceptions.Timeout:
+    #                 msg += port + ' is Timeout'
+    #                 await admin.send(msg)
+    #                 pass
+    #             except requests.exceptions.RequestException as error_message:
+    #                 msg += port + ' is ERROR:' + error_message
+    #                 await admin.send(msg)
+    #                 pass
+    #         await asyncio.sleep(600)
 
-    async def rss_update(self):
-        await self.wait_until_ready()
-        channel = self.get_channel(600315520302055434)
-        # channel = discord.Object(id='521269328046325776')
-        while not self.is_closed():
-            feed = feedparser.parse('https://aya.sanusi.id/feed/')
-            config = configparser.ConfigParser()
-            config.read('feed.ini')
-            if feed.entries[0].published != config['DEFAULT']['latest_post']:
-                if len(feed.entries[0].tags) > 1:
-                    if feed.entries[0].tags[0].term == 'Novel' \
-                                                       or feed.entries[0].tags[1]\
-                                                       .term == 'Novel':
-                        post_type = 'Novel'
-                    else:
-                        post_type = feed.entries[0].tags[0].term
-                else:
-                    post_type = feed.entries[0].tags[0].term
-                msg = ('@everyone Master AYA just published new '
-                       + post_type + ' on her web, the title is '
-                       + feed.entries[0].title
-                       + ' and you can view it in here : '
-                       + feed.entries[0].link)
-                config['DEFAULT']['latest_post'] = feed.entries[0].published
-                with open('feed.ini', 'w') as configfile:
-                    config.write(configfile)
-                await channel.send(msg)
-            await asyncio.sleep(300)
+    # async def rss_update(self):
+    #     await self.wait_until_ready()
+    #     channel = self.get_channel(600315520302055434)
+    #     # channel = discord.Object(id='521269328046325776')
+    #     while not self.is_closed():
+    #         feed = feedparser.parse('https://aya.sanusi.id/feed/')
+    #         config = configparser.ConfigParser()
+    #         config.read('feed.ini')
+    #         if feed.entries[0].published != config['DEFAULT']['latest_post']:
+    #             if len(feed.entries[0].tags) > 1:
+    #                 if feed.entries[0].tags[0].term == 'Novel' \
+    #                                                    or feed.entries[0].tags[1]\
+    #                                                    .term == 'Novel':
+    #                     post_type = 'Novel'
+    #                 else:
+    #                     post_type = feed.entries[0].tags[0].term
+    #             else:
+    #                 post_type = feed.entries[0].tags[0].term
+    #             msg = ('@everyone Master AYA just published new '
+    #                    + post_type + ' on her web, the title is '
+    #                    + feed.entries[0].title
+    #                    + ' and you can view it in here : '
+    #                    + feed.entries[0].link)
+    #             config['DEFAULT']['latest_post'] = feed.entries[0].published
+    #             with open('feed.ini', 'w') as configfile:
+    #                 config.write(configfile)
+    #             await channel.send(msg)
+    #         await asyncio.sleep(300)
 
     async def on_member_join(self, member):
         guild = member.guild
