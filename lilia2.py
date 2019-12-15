@@ -60,11 +60,12 @@ class LiliaBot(discord.Client):
             for port in port_list:
                 port = str(port)
                 msg = 'Instance 5 port: '
-                url = 'http://' + config['SERVER']['ip'] + ':' + port
+                url = 'http://' + config['SERVER']['ip'] + ':' + port + '/web/'
+                logger.info('checking ' + url)
                 try:
                     async with aiohttp.ClientSession() as session:
                         # timeout = aiohttp.ClientTimeout(total=60)
-                        async with session.get(url, timeout=1) as response:
+                        async with session.get(url) as response:
                             if response.status in [200, 301, 302, 303]:
                                 msg += port + ' is OK. Status Code: ' + str(response.status)
                                 logger.info(msg)
@@ -72,11 +73,11 @@ class LiliaBot(discord.Client):
                                 msg += port + ' Error status code: ' + str(response.status)
                                 logger.warning(msg)
                                 await admin.send(msg)
-                except aiohttp.ServerTimeoutError:
-                    msg += port + ' is Timeout'
-                    logger.warning(msg)
-                    await admin.send(msg)
-                    pass
+                # except aiohttp.ServerTimeoutError:
+                #     msg += port + ' is Timeout'
+                #     logger.warning(msg)
+                #     await admin.send(msg)
+                #     pass
                 except aiohttp.ClientError as error_message:
                     msg += port + ' is ERROR:' + error_message
                     logger.warning(msg)
@@ -107,7 +108,7 @@ class LiliaBot(discord.Client):
                     config.write(configfile)
                 await channel.send(msg)
             logger.info('Feed proceed finished')
-            await asyncio.sleep(300)
+            await asyncio.sleep(600)
 
     def get_random_image(self):
         s_file = random.choice(
