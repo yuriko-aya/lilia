@@ -56,38 +56,6 @@ class LiliaBot(discord.Client):
         port_list = json.loads(config.get('SERVER', 'port_list'))
         while not self.is_closed():
             feed = feedparser.parse('https://aya.sanusi.id/feed/')
-            logger.info('Start checking Instance 5 instances')
-            for port in port_list:
-                port = str(port)
-                msg = 'Instance 5 port: '
-                url = 'http://' + config['SERVER']['ip'] + ':' + port + '/web/'
-                logger.info('checking ' + url)
-                try:
-                    async with aiohttp.ClientSession() as session:
-                        # timeout = aiohttp.ClientTimeout(total=60)
-                        async with session.get(url) as response:
-                            if response.status in [200, 301, 302, 303]:
-                                msg += port + ' is OK. Status Code: ' + str(response.status)
-                                logger.info(msg)
-                            else:
-                                msg += port + ' Error status code: ' + str(response.status)
-                                logger.warning(msg)
-                                await admin.send(msg)
-                # except aiohttp.ServerTimeoutError:
-                #     msg += port + ' is Timeout'
-                #     logger.warning(msg)
-                #     await admin.send(msg)
-                #     pass
-                except aiohttp.ClientError as error_message:
-                    msg += port + ' is ERROR:' + error_message
-                    logger.warning(msg)
-                    await admin.send(msg)
-                    pass
-
-                await asyncio.sleep(5)
-            logger.info('Finished checking inatnce-5')
-
-            logger.info('Start to proceed the feed')
             if feed.entries[0].published != config['DEFAULT']['latest_post']:
                 if len(feed.entries[0].tags) > 1:
                     if feed.entries[0].tags[0].term == 'Novel' \
