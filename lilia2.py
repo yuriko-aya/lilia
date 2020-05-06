@@ -112,61 +112,6 @@ class LiliaBot(discord.Client):
         soup = BeautifulSoup(string)
         return soup.get_text()
 
-    # async def check_portcities_instance_5(self):
-    #     await self.wait_until_ready()
-    #     port_list = ['8129', '8130', '8161', '8074', '8085', '8075', '8149', '8154', '8069', '8908', '8154', '8311', '8157', '8073']
-    #     admin = self.get_user(346541452807110666)
-    #     while not self.is_closed():
-    #         for port in port_list:
-    #             msg = 'Instance 5 port: '
-    #             url = 'http://35.197.146.88:' + port
-    #             try:
-    #                 response = requests.get(url, timeout=60)
-    #                 if response.status_code == 200 or response.status_code == 301:
-    #                     msg += port + ' is OK'
-    #                     logger.info(msg)
-    #                 else:
-    #                     msg += port + ' Error status code: ' + response.status_code
-    #                     await admin.send(msg)
-    #             except requests.exceptions.Timeout:
-    #                 msg += port + ' is Timeout'
-    #                 await admin.send(msg)
-    #                 pass
-    #             except requests.exceptions.RequestException as error_message:
-    #                 msg += port + ' is ERROR:' + error_message
-    #                 await admin.send(msg)
-    #                 pass
-    #         await asyncio.sleep(600)
-
-    # async def rss_update(self):
-    #     await self.wait_until_ready()
-    #     channel = self.get_channel(600315520302055434)
-    #     # channel = discord.Object(id='521269328046325776')
-    #     while not self.is_closed():
-    #         feed = feedparser.parse('https://aya.sanusi.id/feed/')
-    #         config = configparser.ConfigParser()
-    #         config.read('feed.ini')
-    #         if feed.entries[0].published != config['DEFAULT']['latest_post']:
-    #             if len(feed.entries[0].tags) > 1:
-    #                 if feed.entries[0].tags[0].term == 'Novel' \
-    #                                                    or feed.entries[0].tags[1]\
-    #                                                    .term == 'Novel':
-    #                     post_type = 'Novel'
-    #                 else:
-    #                     post_type = feed.entries[0].tags[0].term
-    #             else:
-    #                 post_type = feed.entries[0].tags[0].term
-    #             msg = ('@everyone Master AYA just published new '
-    #                    + post_type + ' on her web, the title is '
-    #                    + feed.entries[0].title
-    #                    + ' and you can view it in here : '
-    #                    + feed.entries[0].link)
-    #             config['DEFAULT']['latest_post'] = feed.entries[0].published
-    #             with open('feed.ini', 'w') as configfile:
-    #                 config.write(configfile)
-    #             await channel.send(msg)
-    #         await asyncio.sleep(300)
-
     async def on_member_join(self, member):
         guild = member.guild
         role = discord.utils.get(guild.roles, name='Commoner')
@@ -213,6 +158,43 @@ class LiliaBot(discord.Client):
                 ' Please kindly use `!lilia commands` to learn' \
                 ' how to use me.'.format(message)
             await message.channel.send(msg)
+
+        if message.content.startswith('-game'):
+            result = message.content.split()
+            if len(result) < 10:
+                msg = "Something missing, usage is:"\
+                    '-game game/tournament_name player1 point player2 point player3 point player4 point'
+                await message.channel.send(msg)
+            if len(result) > 10:
+                msg = "Something too much, usage is:"\
+                    '-game game/tournament_name player1 point player2 point player3 point player4 point'
+                await message.channel.send(msg)
+            config = configparser.ConfigParser()
+            config.read(['config.ini'])
+
+            raw = {
+                result[2]: int(result[3]),
+                result[4]: int(result[5]),
+                result[6]: int(result[7]),
+                result[8]: int(result[9]),
+            }
+            raw_sorted = {k: v for k, v in sorted(raw.items(), key=lambda item: item[1], reverse=true)}
+            data = {
+                'key': config['MJSCORE']['key']
+                'game': result[1],
+                'result': raw_sorted,
+            }
+            post_data = requests.post(config['MJSCORE']['url'], data=data)
+            if post_data.status_code == 200:
+                datas = json.loads(post_data.content)
+                message = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
+                          "Position 3: %s with %d points, and Position 4: %s with %d points" % (datas['game'], datas['position1']['player'], datas['position1']['score'],
+                            datas['position2']['player'], datas['position2']['score'],
+                            datas['position3']['player'], datas['position3']['score'],
+                            datas['position4']['player'], datas['position4']['score'],)
+                await message.channel.send(message)
+            else:
+                await message.channel.send("Something wrong" + post_data.content)
 
         if message.content.startswith('!lilia'):
             commands = message.content.split()
