@@ -185,7 +185,7 @@ class LiliaBot(discord.Client):
                     'game': result[1],
                     'result': raw_sorted,
                 }
-                post_data = requests.post(config['MJSCORE']['url'], data=data)
+                post_data = requests.post(config['MJSCORE']['url'], data=json.dumps(data))
                 if post_data.status_code == 200:
                     datas = json.loads(post_data.content)
                     message = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
