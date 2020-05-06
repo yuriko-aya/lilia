@@ -179,7 +179,7 @@ class LiliaBot(discord.Client):
                     result[6]: int(result[7]),
                     result[8]: int(result[9]),
                 }
-                raw_sorted = {k: v for k, v in sorted(raw.items(), key=lambda item: item[1], reverse=true)}
+                raw_sorted = {k: v for k, v in sorted(raw.items(), key=lambda item: item[1], reverse=True)}
                 data = {
                     'key': config['MJSCORE']['key'],
                     'game': result[1],
