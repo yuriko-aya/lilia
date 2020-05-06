@@ -195,7 +195,7 @@ class LiliaBot(discord.Client):
                                 datas['position4']['player'], datas['position4']['score'],)
                     await message.channel.send(message)
                 else:
-                    await message.channel.send("Something wrong" + post_data.content)
+                    await message.channel.send(post_data.content)
 
         if message.content.startswith('!lilia'):
             commands = message.content.split()
