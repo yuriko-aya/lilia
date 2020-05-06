@@ -188,12 +188,12 @@ class LiliaBot(discord.Client):
                 post_data = requests.post(config['MJSCORE']['url'], data=json.dumps(data))
                 if post_data.status_code == 200:
                     datas = json.loads(post_data.content)
-                    message = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
+                    msg = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
                             "Position 3: %s with %d points, and Position 4: %s with %d points" % (datas['game'], datas['position1']['player'], datas['position1']['score'],
                                 datas['position2']['player'], datas['position2']['score'],
                                 datas['position3']['player'], datas['position3']['score'],
                                 datas['position4']['player'], datas['position4']['score'],)
-                    await message.channel.send(message)
+                    await message.channel.send(msg)
                 else:
                     await message.channel.send(post_data.content)
 
