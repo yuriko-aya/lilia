@@ -183,7 +183,7 @@ class LiliaBot(discord.Client):
                 data = {
                     'key': config['MJSCORE']['key'],
                     'game': result[1],
-                    'result': raw_sorted,
+                    'result': raw,
                 }
                 post_data = requests.post(config['MJSCORE']['url'], data=json.dumps(data))
                 if post_data.status_code == 200:
