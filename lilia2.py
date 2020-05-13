@@ -179,23 +179,27 @@ class LiliaBot(discord.Client):
                     result[6]: int(result[7]),
                     result[8]: int(result[9]),
                 }
-                raw_sorted = {k: v for k, v in sorted(raw.items(), key=lambda item: item[1], reverse=True)}
-                data = {
-                    'key': config['MJSCORE']['key'],
-                    'game': result[1],
-                    'result': raw,
-                }
-                post_data = requests.post(config['MJSCORE']['url'], data=json.dumps(data))
-                if post_data.status_code == 200:
-                    datas = json.loads(post_data.content)
-                    msg = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
-                            "Position 3: %s with %d points, and Position 4: %s with %d points" % (datas['game'], datas['position1']['player'], datas['position1']['score'],
-                                datas['position2']['player'], datas['position2']['score'],
-                                datas['position3']['player'], datas['position3']['score'],
-                                datas['position4']['player'], datas['position4']['score'],)
-                    await message.channel.send(msg)
+                total = int(result[3]) + int(result[5]) + int(result[7]) + int(result[9])
+                if total != 100000:
+                    await message.channel.send('Something wrong, the total is not 100.000!')
                 else:
-                    await message.channel.send(post_data.content)
+                    raw_sorted = {k: v for k, v in sorted(raw.items(), key=lambda item: item[1], reverse=True)}
+                    data = {
+                        'key': config['MJSCORE']['key'],
+                        'game': result[1],
+                        'result': raw,
+                    }
+                    post_data = requests.post(config['MJSCORE']['url'], data=json.dumps(data))
+                    if post_data.status_code == 200:
+                        datas = json.loads(post_data.content)
+                        msg = "Game recorded, for game %s, Position 1: %s with %d points, Position 2: %s with %d points, "\
+                                "Position 3: %s with %d points, and Position 4: %s with %d points" % (datas['game'], datas['position1']['player'], datas['position1']['score'],
+                                    datas['position2']['player'], datas['position2']['score'],
+                                    datas['position3']['player'], datas['position3']['score'],
+                                    datas['position4']['player'], datas['position4']['score'],)
+                        await message.channel.send(msg)
+                    else:
+                        await message.channel.send(post_data.content)
 
         if message.content.startswith('!lilia'):
             commands = message.content.split()
